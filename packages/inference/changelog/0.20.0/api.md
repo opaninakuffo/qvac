@@ -1,57 +1,30 @@
 # 🔌 API Changes v0.20.0
 
-## Add deleteCache({ auto: true }) to reclaim automatic KV caches
-
-PR: [#4248](https://github.com/tetherto/qvac/pull/4248)
-
-```typescript
-import { deleteCache } from "@qvac/sdk";
-
-// Reclaim automatic caches; caller-owned named caches are untouched.
-await deleteCache({ auto: true });
-```
-
----
-
-## Pass prompt-processing throughput through completion stats
-
-PR: [#4295](https://github.com/tetherto/qvac/pull/4295)
-
-```typescript
-const run = completion({ modelId, history, stream: true });
-const stats = await run.stats;
-
-stats?.tokensPerSecond; // decode throughput
-stats?.promptTokensPerSecond; // prompt-processing (prefill) throughput
-```
-
----
-
 ## Integrate MiniMax-H3 video generation across inference and SDK
 
 PR: [#4351](https://github.com/tetherto/qvac/pull/4351)
 
 ```ts
 const modelId = await loadModel({
-  modelType: "sdcpp-generation",
-  modelSrc: "/models/h3.gguf",
+  modelType: 'sdcpp-generation',
+  modelSrc: '/models/h3.gguf',
   modelConfig: {
-    mode: "video",
-    llmModelSrc: "/models/h3-text-encoder.gguf",
-    vaeModelSrc: "/models/video-vae.safetensors",
-    audioVaeModelSrc: "/models/audio-vae.safetensors",
-    backend: "vulkan0",
-    stream_layers: false,
-  },
-});
+    mode: 'video',
+    llmModelSrc: '/models/h3-text-encoder.gguf',
+    vaeModelSrc: '/models/video-vae.safetensors',
+    audioVaeModelSrc: '/models/audio-vae.safetensors',
+    backend: 'vulkan0',
+    stream_layers: false
+  }
+})
 const result = video({
   modelId,
-  mode: "txt2vid",
-  prompt: "Steam rises from coffee.",
+  mode: 'txt2vid',
+  prompt: 'Steam rises from coffee.',
   video_frames: 124,
   fps: 24,
-  cfg_scale: 1,
-});
+  cfg_scale: 1
+})
 ```
 
 ---
@@ -61,16 +34,16 @@ const result = video({
 PR: [#4357](https://github.com/tetherto/qvac/pull/4357)
 
 ```typescript
-import { loadModel, PARAKEET_NEMOTRON_0_6B_Q4_0 } from "@qvac/sdk";
+import { loadModel, PARAKEET_NEMOTRON_0_6B_Q4_0 } from '@qvac/sdk'
 
 const modelId = await loadModel({
   modelSrc: PARAKEET_NEMOTRON_0_6B_Q4_0,
-  modelType: "parakeet-transcription",
+  modelType: 'parakeet-transcription',
   modelConfig: {
-    language: "auto",
-    streaming: true,
-  },
-});
+    language: 'auto',
+    streaming: true
+  }
+})
 ```
 
 ```
@@ -81,39 +54,17 @@ PARAKEET_NEMOTRON_0_6B_Q8_0
 
 ---
 
-## Refuse from the computed floor when no calibration applies
-
-PR: [#4358](https://github.com/tetherto/qvac/pull/4358)
-
-```typescript
-const result = await assessModelFit({
-  models: [
-    {
-      model: QWEN3_8B_INST_Q4_K_M,
-      workload: { kind: "llm", contextTokens: 8192 },
-    },
-  ],
-});
-// android-arm64: { verdict: 'likely-too-large', basis: 'system-memory',  evidence: 'computed-only', floorBytes: 5425000000, ... }
-// ios-arm64:     { verdict: 'likely-too-large', basis: 'process-memory', evidence: 'computed-only', floorBytes: 5425000000, ... }
-if (result.evidence === "computed-only" && result.verdict === "unknown") {
-  // uncalibrated, not a near-miss
-}
-```
-
----
-
 ## Adopt @qvac/audiogen-ggml 0.4.0 and expose the rest of its surface
 
 PR: [#4406](https://github.com/tetherto/qvac/pull/4406)
 
 ```typescript
 // Describe a clip, then re-synthesize it from the recovered codes.
-const run = audioUnderstand({ modelId, sourceAudio: "/path/to/song.wav" });
-const { caption, bpm, keyscale, audioCodes } = await run.description;
+const run = audioUnderstand({ modelId, sourceAudio: '/path/to/song.wav' })
+const { caption, bpm, keyscale, audioCodes } = await run.description
 
-const remake = audioGen({ modelId, caption, audioCodes, generateLrc: true });
-const { lrc, lyricsScore } = (await remake.stats) ?? {};
+const remake = audioGen({ modelId, caption, audioCodes, generateLrc: true })
+const { lrc, lyricsScore } = (await remake.stats) ?? {}
 ```
 
 ---
@@ -126,27 +77,27 @@ PR: [#4414](https://github.com/tetherto/qvac/pull/4414)
 // Load-time options that were unreachable before
 await loadModel({
   modelSrc: TTS_COSYVOICE3_LLM_COSYVOICE_Q8_0,
-  modelType: "tts",
+  modelType: 'tts',
   modelConfig: {
-    ttsEngine: "cosyvoice3",
-    referenceAudioSrc: "/path/to/reference.wav",
+    ttsEngine: 'cosyvoice3',
+    referenceAudioSrc: '/path/to/reference.wav',
     cosyvoice3S3tokModelSrc: TTS_COSYVOICE3_S3TOK_COSYVOICE_Q8_0.src,
     cosyvoice3CampplusModelSrc: TTS_COSYVOICE3_CAMPPLUS_COSYVOICE_FP32.src,
-    promptText: "Exactly what the reference recording says.", // omit for cross-lingual
-    lavasrEnhancerModelSrc: TTS_ENHANCER_LAVASR_FP16.src,
-  },
-});
+    promptText: 'Exactly what the reference recording says.', // omit for cross-lingual
+    lavasrEnhancerModelSrc: TTS_ENHANCER_LAVASR_FP16.src
+  }
+})
 // Likewise: Chatterbox { outputSampleRate, ttsSpeed, nCtx, kvCacheType },
 // Supertonic { pace, threads, nGpuLayers, seed }, Parler { lavasr*ModelSrc },
 // all engines { backendsDir } (+ openclCacheDir where the engine reads it).
 
 // New result surface
-const result = textToSpeech({ modelId, text });
-const sampleRate = await result.sampleRate; // resolves on the first frame; 48000 with the enhancer
-for await (const sample of result.bufferStream) play(sample);
-const stats = await result.stats; // realTimeFactor, backendId, generatedFrames, …
-await cancel({ requestId: result.requestId }); // stops the engine, not just delivery
-(await result.stopReason) === "cancelled";
+const result = textToSpeech({ modelId, text })
+const sampleRate = await result.sampleRate // resolves on the first frame; 48000 with the enhancer
+for await (const sample of result.bufferStream) play(sample)
+const stats = await result.stats // realTimeFactor, backendId, generatedFrames, …
+await cancel({ requestId: result.requestId }) // stops the engine, not just delivery
+;(await result.stopReason) === 'cancelled'
 
 // Response frames: sampleRate, chunkIndex, sentenceChunk, isLast; terminal frame: stats, stopReason
 // New root exports: TTS_ENGINES, TtsEngine, TTS_PARLER_EMOTIONS, TTS_SENTENCE_DELIMITER_PRESETS,
@@ -184,16 +135,13 @@ No per-platform package @qvac/tts-ggml-linux-x64 is installed alongside it eithe
 PR: [#4457](https://github.com/tetherto/qvac/pull/4457)
 
 ```typescript
-const index = await createVectorIndex({
-  dim: 1024,
-  storage: VectorIndexStorage.TURBOVEC_Q4,
-});
-await index.add({ ids: ["1", "2"], vectors: embeddings });
-const hits = await index.search({ query: queryEmbedding, k: 3 }); // [{ id, score }]
-await index.write({ path: "indexes/articles.qvi" });
-await index.dispose();
+const index = await createVectorIndex({ dim: 1024, storage: VectorIndexStorage.TURBOVEC_Q4 })
+await index.add({ ids: ['1', '2'], vectors: embeddings })
+const hits = await index.search({ query: queryEmbedding, k: 3 }) // [{ id, score }]
+await index.write({ path: 'indexes/articles.qvi' })
+await index.dispose()
 
-const reopened = await loadVectorIndex({ path: "indexes/articles.qvi" });
+const reopened = await loadVectorIndex({ path: 'indexes/articles.qvi' })
 ```
 
 ---
@@ -208,10 +156,10 @@ const run = sdk.completion({
   history,
   tools: [getWeather],
   stream: false,
-  generationParams: { tool_choice: "required" },
-});
-const final = await run.final;
-if (final.toolCalls.length === 0) console.log(final.toolErrors);
+  generationParams: { tool_choice: 'required' }
+})
+const final = await run.final
+if (final.toolCalls.length === 0) console.log(final.toolErrors)
 ```
 
 ---
