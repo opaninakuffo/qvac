@@ -4,7 +4,7 @@
 
 📦 **NPM:** https://www.npmjs.com/package/@qvac/inference/v/0.20.0
 
-QVAC Inference 0.20.0 is the engine cut that SDK 0.20.0 will depend on. It adds an in-process TurboVec vector index, MiniMax-H3 video, Parakeet Nemotron transcription, TranslatePsy AfriSLM, and the rest of the AudioGen and TTS surfaces. On mobile, llama `assessModelFit` runs in-process on a worker thread instead of a child process. Diffusion CPU flags, `splitMode: 'row'`, and how system prompts combine with KV cache all change.
+QVAC Inference 0.20.0 is the engine cut that SDK 0.20.0 will depend on. It adds an in-process TurboVec vector index, MiniMax-H3 video, Parakeet Nemotron transcription, and the rest of the AudioGen and TTS surfaces. On mobile, llama `assessModelFit` runs in-process on a worker thread instead of a child process. Diffusion CPU flags, `splitMode: 'row'`, and how system prompts combine with KV cache all change.
 
 Publish this package before `@qvac/sdk@0.20.0`. The SDK release points its `@qvac/inference` range at this version.
 
@@ -20,27 +20,27 @@ Publish this package before `@qvac/sdk@0.20.0`. The SDK release points its `@qva
 const modelConfig = {
   clip_on_cpu: true,
   vae_on_cpu: true,
-  control_net_cpu: true,
-};
+  control_net_cpu: true
+}
 ```
 
 **After:**
 
 ```typescript
 const modelConfig = {
-  params_backend: "te=cpu,vae=cpu",
-  backend: "controlnet=cpu",
-};
+  params_backend: 'te=cpu,vae=cpu',
+  backend: 'controlnet=cpu'
+}
 ```
 
 CPU layer streaming:
 
 ```typescript
 const modelConfig = {
-  params_backend: "diffusion=cpu",
+  params_backend: 'diffusion=cpu',
   max_vram: -1,
-  stream_layers: true,
-};
+  stream_layers: true
+}
 ```
 
 ### System prompts apply on every completion path
@@ -55,11 +55,11 @@ A system message in `history` is no longer dropped when `kvCache` is on. `modelC
 completion({
   modelId, // loaded with system_prompt: 'You are a helpful assistant.'
   history: [
-    { role: "system", content: "Always answer with the word BANANA." },
-    { role: "user", content: "What is the capital of France?" },
+    { role: 'system', content: 'Always answer with the word BANANA.' },
+    { role: 'user', content: 'What is the capital of France?' }
   ],
-  kvCache: true,
-});
+  kvCache: true
+})
 // the caller's system message is discarded
 ```
 
@@ -69,11 +69,11 @@ completion({
 completion({
   modelId, // loaded with system_prompt: 'You are a helpful assistant.'
   history: [
-    { role: "system", content: "Always answer with the word BANANA." },
-    { role: "user", content: "What is the capital of France?" },
+    { role: 'system', content: 'Always answer with the word BANANA.' },
+    { role: 'user', content: 'What is the capital of France?' }
   ],
-  kvCache: true,
-});
+  kvCache: true
+})
 // the caller's system message is honoured
 ```
 
@@ -87,7 +87,7 @@ Fabric 10549.1.0 dropped llama.cpp's unused row split. `modelConfig.splitMode` i
 
 ```typescript
 modelConfig: {
-  splitMode: "row";
+  splitMode: 'row'
 }
 ```
 
@@ -95,13 +95,9 @@ modelConfig: {
 
 ```typescript
 modelConfig: {
-  splitMode: "layer";
+  splitMode: 'layer'
 }
 ```
-
-### Diffusion VAE constant names
-
-VAE catalog constants now include the type tag. `ABOT_WORLD_0_5B_LF_VAE` / `LTX_2_3_VAE` become `ABOT_WORLD_0_5B_LF_TAEHV_VAE`, `ABOT_WORLD_0_5B_LF_WAN_VAE`, `LTX_2_3_AUDIO_VAE`, and `LTX_2_3_VIDEO_VAE`.
 
 ## New APIs
 
@@ -110,22 +106,18 @@ VAE catalog constants now include the type tag. `ABOT_WORLD_0_5B_LF_VAE` / `LTX_
 `createVectorIndex` builds an in-process vector index on the embedding plugin's TurboVec engine. Pair it with `embed()`: add each document's embedding under an id you choose, search with a query embedding, and map the returned ids back to your store. Default storage is `VectorIndexStorage.TURBOVEC_Q4`. Dimension must be a multiple of 8 and at most 1024 for TurboVec modes.
 
 ```typescript
-import {
-  createVectorIndex,
-  loadVectorIndex,
-  VectorIndexStorage,
-} from "@qvac/inference";
+import { createVectorIndex, loadVectorIndex, VectorIndexStorage } from '@qvac/inference'
 
 const index = await createVectorIndex({
   dim: 1024,
-  storage: VectorIndexStorage.TURBOVEC_Q4,
-});
-await index.add({ ids: ["1", "2"], vectors: embeddings });
-const hits = await index.search({ query: queryEmbedding, k: 3 });
-await index.write({ path: "indexes/articles.qvi" });
-await index.dispose();
+  storage: VectorIndexStorage.TURBOVEC_Q4
+})
+await index.add({ ids: ['1', '2'], vectors: embeddings })
+const hits = await index.search({ query: queryEmbedding, k: 3 })
+await index.write({ path: 'indexes/articles.qvi' })
+await index.dispose()
 
-const reopened = await loadVectorIndex({ path: "indexes/articles.qvi" });
+const reopened = await loadVectorIndex({ path: 'indexes/articles.qvi' })
 ```
 
 ### MiniMax-H3 video
@@ -134,25 +126,25 @@ const reopened = await loadVectorIndex({ path: "indexes/articles.qvi" });
 
 ```typescript
 const modelId = await loadModel({
-  modelType: "sdcpp-generation",
-  modelSrc: "/models/h3.gguf",
+  modelType: 'sdcpp-generation',
+  modelSrc: '/models/h3.gguf',
   modelConfig: {
-    mode: "video",
-    llmModelSrc: "/models/h3-text-encoder.gguf",
-    vaeModelSrc: "/models/video-vae.safetensors",
-    audioVaeModelSrc: "/models/audio-vae.safetensors",
-    backend: "vulkan0",
-    stream_layers: false,
-  },
-});
+    mode: 'video',
+    llmModelSrc: '/models/h3-text-encoder.gguf',
+    vaeModelSrc: '/models/video-vae.safetensors',
+    audioVaeModelSrc: '/models/audio-vae.safetensors',
+    backend: 'vulkan0',
+    stream_layers: false
+  }
+})
 const result = video({
   modelId,
-  mode: "txt2vid",
-  prompt: "Steam rises from coffee.",
+  mode: 'txt2vid',
+  prompt: 'Steam rises from coffee.',
   video_frames: 124,
   fps: 24,
-  cfg_scale: 1,
-});
+  cfg_scale: 1
+})
 ```
 
 ### Parakeet Nemotron
@@ -160,16 +152,16 @@ const result = video({
 Three Parakeet Nemotron 0.6B weights are on the catalog for `parakeet-transcription`.
 
 ```typescript
-import { loadModel, PARAKEET_NEMOTRON_0_6B_Q4_0 } from "@qvac/inference";
+import { loadModel, PARAKEET_NEMOTRON_0_6B_Q4_0 } from '@qvac/inference'
 
 const modelId = await loadModel({
   modelSrc: PARAKEET_NEMOTRON_0_6B_Q4_0,
-  modelType: "parakeet-transcription",
+  modelType: 'parakeet-transcription',
   modelConfig: {
-    language: "auto",
-    streaming: true,
-  },
-});
+    language: 'auto',
+    streaming: true
+  }
+})
 ```
 
 ### AudioGen understand and remake
@@ -177,11 +169,11 @@ const modelId = await loadModel({
 `audioUnderstand` returns caption, bpm, keyscale, and audio codes. Pass those codes back into `audioGen` to re-synthesize the clip, optionally with LRC lyrics.
 
 ```typescript
-const run = audioUnderstand({ modelId, sourceAudio: "/path/to/song.wav" });
-const { caption, bpm, keyscale, audioCodes } = await run.description;
+const run = audioUnderstand({ modelId, sourceAudio: '/path/to/song.wav' })
+const { caption, bpm, keyscale, audioCodes } = await run.description
 
-const remake = audioGen({ modelId, caption, audioCodes, generateLrc: true });
-const { lrc, lyricsScore } = (await remake.stats) ?? {};
+const remake = audioGen({ modelId, caption, audioCodes, generateLrc: true })
+const { lrc, lyricsScore } = (await remake.stats) ?? {}
 ```
 
 ### TTS load options, sample rate, and cancel
@@ -189,11 +181,11 @@ const { lrc, lyricsScore } = (await remake.stats) ?? {};
 Load-time CosyVoice3, Chatterbox, Supertonic, and Parler fields that were previously unreachable now pass through. `textToSpeech` exposes `sampleRate` on the first frame, real stats (`realTimeFactor`, `backendId`, `generatedFrames`), and `cancel({ requestId })` stops the engine, not only delivery.
 
 ```typescript
-const result = textToSpeech({ modelId, text });
-const sampleRate = await result.sampleRate;
-for await (const sample of result.bufferStream) play(sample);
-await cancel({ requestId: result.requestId });
-const stopReason = await result.stopReason; // 'cancelled' when the engine stopped
+const result = textToSpeech({ modelId, text })
+const sampleRate = await result.sampleRate
+for await (const sample of result.bufferStream) play(sample)
+await cancel({ requestId: result.requestId })
+const stopReason = await result.stopReason // 'cancelled' when the engine stopped
 ```
 
 ### Tool grammar
@@ -206,38 +198,15 @@ const run = completion({
   history,
   tools: [getWeather],
   stream: false,
-  generationParams: { tool_choice: "required" },
-});
-const final = await run.final;
-if (final.toolCalls.length === 0) console.log(final.toolErrors);
-```
-
-### Reclaim automatic KV caches
-
-`deleteCache({ auto: true })` deletes automatic KV caches and leaves caller-owned named caches alone.
-
-```typescript
-import { deleteCache } from "@qvac/inference";
-
-await deleteCache({ auto: true });
-```
-
-### Prefill throughput on completion stats
-
-Streaming completions expose `stats.promptTokensPerSecond` next to decode `tokensPerSecond`.
-
-```typescript
-const run = completion({ modelId, history, stream: true });
-const stats = await run.stats;
-stats?.tokensPerSecond;
-stats?.promptTokensPerSecond;
+  generationParams: { tool_choice: 'required' }
+})
+const final = await run.final
+if (final.toolCalls.length === 0) console.log(final.toolErrors)
 ```
 
 ## Features
 
 On Android and iOS, llama `assessModelFit` runs `@qvac/model-fit` in-process on a worker thread. There is no disposable child process on those hosts. A leftover `.running` marker from a previous abort is treated as crashed so the same path and config skip native instead of retrying the abort. The JavaScript loop stays free while the fit runs.
-
-When no calibration row applies, `assessModelFit` can refuse from the computed memory floor instead of returning unknown. iOS reports the per-process memory allowance as that basis.
 
 ## Bug Fixes
 
@@ -253,12 +222,6 @@ An addon's logger is attached when its model loads, not when the plugin register
 PARAKEET_NEMOTRON_0_6B_F16
 PARAKEET_NEMOTRON_0_6B_Q4_0
 PARAKEET_NEMOTRON_0_6B_Q8_0
-TRANSLATEPSY_AFRISLM_0_8B_TRANSLATION_Q4_K_M
-TRANSLATEPSY_AFRISLM_0_8B_TRANSLATION_Q8_0
-TRANSLATEPSY_AFRISLM_2B_TRANSLATION_Q4_K_M
-TRANSLATEPSY_AFRISLM_2B_TRANSLATION_Q8_0
-TRANSLATEPSY_AFRISLM_4B_TRANSLATION_Q4_K_M
-TRANSLATEPSY_AFRISLM_4B_TRANSLATION_Q8_0
 ```
 
 ## [0.17.0]

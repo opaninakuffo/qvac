@@ -1,37 +1,5 @@
 # 💥 Breaking Changes v0.20.0
 
-## Derive diffusion VAE export names from the type tag
-
-PR: [#4234](https://github.com/tetherto/qvac/pull/4234)
-
-**BEFORE:**
-
-```typescript
-ABOT_WORLD_0_5B_LF_VAE;
-ABOT_WORLD_0_5B_LF_VAE_F16;
-LTX_2_3_VAE;
-LTX_2_3_VAE_1;
-```
-
-**AFTER:**
-
-```typescript
-ABOT_WORLD_0_5B_LF_TAEHV_VAE;
-ABOT_WORLD_0_5B_LF_WAN_VAE;
-LTX_2_3_AUDIO_VAE;
-LTX_2_3_VIDEO_VAE;
-```
-
-> [!NOTE]
-> The ai-sdk-provider constants regeneration is not included as it's out-of-date already and produces a lot of changes that are out of scope here.
-
----
-
-- To see the specific tasks where the Asana app for GitHub is being used, see below:
-  - https://app.asana.com/0/0/1217706794656806
-
----
-
 ## Integrate diffusion layer streaming in the SDK
 
 PR: [#4389](https://github.com/tetherto/qvac/pull/4389)
@@ -42,17 +10,17 @@ PR: [#4389](https://github.com/tetherto/qvac/pull/4389)
 const modelConfig = {
   clip_on_cpu: true,
   vae_on_cpu: true,
-  control_net_cpu: true,
-};
+  control_net_cpu: true
+}
 ```
 
 **AFTER:**
 
 ```typescript
 const modelConfig = {
-  params_backend: "te=cpu,vae=cpu",
-  backend: "controlnet=cpu",
-};
+  params_backend: 'te=cpu,vae=cpu',
+  backend: 'controlnet=cpu'
+}
 ```
 
 To run the text encoder or VAE graph on CPU, add `te=cpu` or `vae=cpu` to `backend`.
@@ -61,10 +29,10 @@ CPU layer streaming requires CPU diffusion parameter residency and graph cutting
 
 ```typescript
 const modelConfig = {
-  params_backend: "diffusion=cpu",
+  params_backend: 'diffusion=cpu',
   max_vram: -1,
-  stream_layers: true,
-};
+  stream_layers: true
+}
 ```
 
 ---
@@ -84,11 +52,11 @@ PR: [#4404](https://github.com/tetherto/qvac/pull/4404)
 completion({
   modelId, // loaded with system_prompt: 'You are a helpful assistant.'
   history: [
-    { role: "system", content: "Always answer with the word BANANA." },
-    { role: "user", content: "What is the capital of France?" },
+    { role: 'system', content: 'Always answer with the word BANANA.' },
+    { role: 'user', content: 'What is the capital of France?' }
   ],
-  kvCache: true,
-});
+  kvCache: true
+})
 // reply:         "Paris"   — the caller's system message is discarded
 // prompt_tokens: 41
 ```
@@ -99,11 +67,11 @@ completion({
 completion({
   modelId, // loaded with system_prompt: 'You are a helpful assistant.'
   history: [
-    { role: "system", content: "Always answer with the word BANANA." },
-    { role: "user", content: "What is the capital of France?" },
+    { role: 'system', content: 'Always answer with the word BANANA.' },
+    { role: 'user', content: 'What is the capital of France?' }
   ],
-  kvCache: true,
-});
+  kvCache: true
+})
 // reply:         "BANANA"  — the caller's system message is honoured
 // prompt_tokens: 57
 ```
@@ -115,8 +83,8 @@ A caller with `system_prompt` configured, no system message in the history, and 
 ```typescript
 completion({
   modelId, // loaded with system_prompt: 'Always answer with the word BANANA.'
-  history: [{ role: "user", content: "What is the capital of France?" }],
-});
+  history: [{ role: 'user', content: 'What is the capital of France?' }]
+})
 // reply: "The capital of France is Paris."  — the configured prompt is ignored
 ```
 
@@ -125,8 +93,8 @@ completion({
 ```typescript
 completion({
   modelId, // loaded with system_prompt: 'Always answer with the word BANANA.'
-  history: [{ role: "user", content: "What is the capital of France?" }],
-});
+  history: [{ role: 'user', content: 'What is the capital of France?' }]
+})
 // reply: "BANANA"  — the configured prompt is applied
 ```
 
@@ -137,8 +105,8 @@ Every other caller that sends no system message. `LLM_CONFIG_DEFAULTS.system_pro
 ```typescript
 completion({
   modelId, // loaded with no system_prompt of its own
-  history: [{ role: "user", content: "What is the capital of France?" }],
-});
+  history: [{ role: 'user', content: 'What is the capital of France?' }]
+})
 // payload: [{ role: 'user', ... }]
 ```
 
@@ -147,8 +115,8 @@ completion({
 ```typescript
 completion({
   modelId, // loaded with no system_prompt of its own
-  history: [{ role: "user", content: "What is the capital of France?" }],
-});
+  history: [{ role: 'user', content: 'What is the capital of France?' }]
+})
 // payload: [{ role: 'system', content: 'You are a helpful assistant.' }, { role: 'user', ... }]
 ```
 
@@ -162,7 +130,7 @@ PR: [#4439](https://github.com/tetherto/qvac/pull/4439)
 
 ```typescript
 modelConfig: {
-  splitMode: row;
+  splitMode: row
 }
 ```
 
@@ -170,7 +138,7 @@ modelConfig: {
 
 ```typescript
 modelConfig: {
-  splitMode: layer;
+  splitMode: layer
 }
 ```
 
