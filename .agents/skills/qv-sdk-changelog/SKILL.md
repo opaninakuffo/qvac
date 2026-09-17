@@ -30,19 +30,13 @@ If the user doesn't specify, ask which SDK pod package they want to generate a c
 
 Package slugs match git tags (`sdk`, `inference`, `cli`, `ai-sdk-provider`, `opencode-plugin`, `openclaw-plugin`, …). Directory resolution (including `plugins/*`) is in `scripts/sdk/package-paths.cjs`.
 
-**`sdk` and `inference` are lockstep on major.minor.** Two changelogs, two
-releases, engine first: `--package=inference` for `release-inference-<x.y.z>`,
-then `--package=sdk` for `release-sdk-<x.y.z>`. **Both changelogs for the same
-`x.y.z` start at the same base** — the last shipped lockstep version, including
-its latest patch (e.g. both 0.20.0 notes start at 0.19.1). Do not take inference
-from the previous `.0` while SDK used the last patch; that duplicates already-
-shipped notes on the engine and makes the two files disagree.
-
-The SDK is the consumer-facing full notes. `--package=sdk` also scans
-`packages/inference` (`CHANGELOG_EXTRA_SCAN_DIRS` in
-`scripts/sdk/package-paths.cjs`), so engine work that landed after that shared
-base must appear in the SDK changelog. The inference changelog is the engine-only
-slice from that same base. A patch on either side is one release of its own.
+**`sdk` and `inference` are separate releases that share a major and minor.** Moving to a
+new major.minor is two changelogs and two releases, engine first: `--package=inference`
+for `release-inference-<x.y.z>`, then `--package=sdk` for `release-sdk-<x.y.z>`. Engine
+commits are scanned into the SDK changelog too (`CHANGELOG_EXTRA_SCAN_DIRS` in
+`scripts/sdk/package-paths.cjs`), so the engine's user-facing changes appear in the SDK
+release notes as well — the SDK is where consumers read them. A patch on either side is
+one release of its own.
 
 **Working branch (when cutting from a release line):** use
 `chore/<pkg>-<x.y.z>-changelog` (e.g. `chore/sdk-0.17.0-changelog`). Do **not**
@@ -76,27 +70,8 @@ Run `git tag --list "<package>-v*" --sort=-v:refname` to check for existing vers
 
 **Why this matters:** patches ship on separate release branches and get backmerged into main.
 Using the latest patch tag as base for a minor release would miss all PRs that landed on main
-between the previous minor release and the last backmerge. The correct base for a **standalone**
-minor (cli, plugins, a package not lockstep with another) is the previous minor's `.0` tag.
-
-**Lockstep exception (`sdk` + `inference` at the same major.minor):** ignore the
-`.0` default. Both packages use the **same** `--base-commit` / `--base-version` as
-the last lockstep ship (often the last patch backmerge on main). Find it from the
-SHA the SDK changelog for that version used, or:
-
-```bash
-git log --oneline -- packages/inference/package.json
-# skiplog backmerge that landed the last lockstep version on main
-```
-
-**`inference-v*` / historical `sdk-v*` tags are often not ancestors of `main`.**
-Inference tags used to live on `release-sdk-*`; after split-publish they live on
-`release-inference-*`. Auto-detected tags then fail `merge-base --is-ancestor`.
-Pass `--base-commit=<sha> --base-version=<x.y.z>` instead of relying on the tag.
-
-**Nested worktrees:** unset stale `GIT_DIR` / `GIT_WORK_TREE` from a parent Cursor
-session before any git or changelog command (`unset GIT_DIR GIT_WORK_TREE`).
-Otherwise the generator runs against the parent repo.
+between the previous minor release and the last backmerge. The correct base for a minor release
+is the previous minor's `.0` tag.
 
 ### Step 3: Generate Raw Changelog
 
@@ -173,27 +148,17 @@ prefers it over `CHANGELOG.md`). Easiest way: re-run the script from Step 3 — 
 **Format the generated markdown (mandatory).** `CHANGELOG_LLM.md` is authored by
 hand here, so it is the file most likely to carry markdown formatting issues that a
 committed-file format check would later reject. Every SDK pod package uses prettier
-(`format` = `prettier --check .`, `format:fix` = `prettier --write .`) with
-`.prettierrc` set to `"prettier-config-holepunch"`. **Never `--no-config`.** CI
-(`[inference] format`, `[sdk] format`, …) loads holepunch; `--no-config` or a
-different parser (quote style, trailing commas) is the usual red we hit.
-
-`bunx prettier` from a worktree **without** `node_modules` fails with
-`Cannot find package 'prettier-config-holepunch'` and then either skips the
-check or formats with a fallback that CI will reject. Install first, then check
-the same way CI does:
+(`format` = `prettier --check .`, `format:fix` = `prettier --write .`). Run the check
+scoped to the changelog output so any issue surfaces now:
 
 ```bash
 cd packages/<package>
-# if this worktree has no node_modules:
-bun install
 bunx prettier --check "changelog/**/*.md" "CHANGELOG.md"
-# or, matching CI: bun run format
 ```
 
-If it reports problems, fix them — `bunx prettier --write` on the same paths, or
-`bun run format:fix` — and re-run the check until it passes clean. Do this before
-moving on so the release commit carries only prettier-clean markdown.
+If it reports problems, fix them — `bunx prettier --write` on the same paths, or hand-edit —
+and re-run the check until it passes clean. Do this before moving on so the release commit
+carries only prettier-clean markdown.
 
 **Downstream rendering note:** the docs site reads `CHANGELOG_LLM.md`
 **verbatim** and inlines it under a `### @qvac/<pkg>` subsection of the
@@ -398,26 +363,6 @@ Examples:
 - `sdk-v0.8.1` (patch — used as base for next patch release)
 - `rag-v2.0.0`
 
-## Repeated footguns
-
-These have gone red on more than one SDK-pod changelog PR. Fix them before
-push, and keep this list to things that are cheap to prevent:
-
-- **Prettier is holepunch, not stock.** `.prettierrc` is `"prettier-config-holepunch"`.
-  Never `--no-config`. Never `bunx prettier` until `packages/<pkg>/node_modules`
-  (or a linked install) can resolve that package. Quote style and trailing commas
-  on `CHANGELOG_LLM.md` are the usual fail.
-- **Lockstep base.** `sdk` and `inference` at the same `x.y.z` share one
-  `--base-commit` / `--base-version` (last lockstep ship, including last patch).
-  SDK notes are the full consumer set; inference is the engine slice of that set.
-- **`inference-v*` is often not on `main`.** Use the backmerge SHA, not the tag.
-- **Nested worktrees inherit `GIT_DIR`.** `unset GIT_DIR GIT_WORK_TREE` before
-  generate/commit/cherry-pick, or you operate on the parent repo.
-- **Push the org remote** (`upstream` when that is `tetherto/qvac`), not the
-  contributor fork. `git push` with no remote follows `origin`.
-- **Do not skip SDK Pod Checks.** Workspace red vs published red is a real
-  signal; `[skip-sdk-pod-checks]` is not the changelog fix.
-
 ## Quality Checklist
 
 Before completing:
@@ -426,12 +371,10 @@ Before completing:
 - [ ] Working head (if branched for the release PR) is `chore/<pkg>-<x.y.z>-changelog`, not `release-*`
 - [ ] Clone is not shallow (`git rev-parse --is-shallow-repository` → `false`)
 - [ ] Base reference resolved (tag or `--base-commit`) and is an ancestor of `HEAD`
-- [ ] For lockstep `sdk` + `inference` at the same major.minor: both used the **same** `--base-commit` / `--base-version` (last lockstep ship, including last patch); SDK changelog includes the engine slice
-- [ ] `GIT_DIR` / `GIT_WORK_TREE` unset (or pointed at this worktree) so generate/git did not run in a parent repo
 - [ ] PRs scoped to package path only
 - [ ] Changelog files written to correct version directory
 - [ ] CHANGELOG_LLM.md generated (mandatory) and follows format guide
-- [ ] Generated markdown is prettier-clean with **prettier-config-holepunch** resolved (`bun install` in `packages/<pkg>` if needed; never `--no-config`)
+- [ ] Generated markdown is prettier-clean (`prettier --check` on the changelog output passes)
 - [ ] announcement-post.txt generated (mandatory, gitignored)
 - [ ] NOTICE file updated for the target package
 - [ ] When `--package=sdk`: `qv-sdk-inference-version` run (engine version published, sdk version and `@qvac/inference` range sharing a major.minor, sdk-python regenerated), python `generate.py --check` passing
@@ -440,7 +383,6 @@ Before completing:
 - [ ] Versions sorted in descending semver order
 - [ ] No duplicated versions
 - [ ] Root file is deterministic (fully regenerated)
-- [ ] Org remote (`upstream` when that is tetherto/qvac) is the push target, not the fork
 
 ## References
 
