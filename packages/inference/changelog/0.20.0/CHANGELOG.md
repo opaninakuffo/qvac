@@ -33,7 +33,7 @@ Release Date: 2026-09-17
 - Derive diffusion VAE export names from the type tag. (see PR [#4234](https://github.com/tetherto/qvac/pull/4234)) - See [breaking changes](./breaking.md), [model changes](./models.md)
   Added: ABOT_WORLD_0_5B_LF_TAEHV_VAE, ABOT_WORLD_0_5B_LF_WAN_VAE, LTX_2_3_AUDIO_VAE, LTX_2_3_VIDEO_VAE
   Removed: ABOT_WORLD_0_5B_LF_VAE, ABOT_WORLD_0_5B_LF_VAE_F16, LTX_2_3_VAE, LTX_2_3_VAE_1
-- Add Nemotron SDK support. (see PR [#4357](https://github.com/tetherto/qvac/pull/4357)) - See [API changes](./api.md), [model changes](./models.md)
+- Add Nemotron SDK support. (see PR [#4357](https://github.com/tetherto/qvac/pull/4357)) - See [breaking changes](./breaking.md), [API changes](./api.md), [model changes](./models.md)
   Added: PARAKEET_NEMOTRON_0_6B_F16, PARAKEET_NEMOTRON_0_6B_Q4_0, PARAKEET_NEMOTRON_0_6B_Q8_0
 - Regenerate SDK and AI SDK provider model catalogs. (see PR [#4384](https://github.com/tetherto/qvac/pull/4384)) - See [model changes](./models.md)
   Added: TRANSLATEPSY_AFRISLM_0_8B_TRANSLATION_Q4_K_M, TRANSLATEPSY_AFRISLM_0_8B_TRANSLATION_Q8_0, TRANSLATEPSY_AFRISLM_2B_TRANSLATION_Q4_K_M, TRANSLATEPSY_AFRISLM_2B_TRANSLATION_Q8_0, TRANSLATEPSY_AFRISLM_4B_TRANSLATION_Q4_K_M (and 4 more)
