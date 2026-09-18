@@ -150,11 +150,47 @@ completion({
 
 PR: [#4439](https://github.com/tetherto/qvac/pull/4439)
 
+Fabric 10549.1.0 dropped llama.cpp's unused row split.
+
+Completion models: `modelConfig['split-mode']` is `'none'`, `'layer'` or `'tensor'`. `'row'` is rejected.
+Embedding models: `modelConfig.splitMode` is `'none'` or `'layer'`. `'row'` is rejected.
+`'tensor'` on completion models is unaffected.
+
+On embeddings, `'row'` was documented as tensor parallelism. That llama.cpp row split never took effect here (SYCL-only; it ran as `'layer'`), and embeddings have no `'tensor'` replacement. Use `'layer'`.
+
+**BEFORE:**
+
+```typescript
+// completion
+modelConfig: { 'split-mode': 'row' }
+
+// embedding
+modelConfig: { splitMode: 'row' }
+```
+
+**AFTER:**
+
+```typescript
+// completion
+modelConfig: { 'split-mode': 'layer' } // or 'tensor'
+
+// embedding
+modelConfig: { splitMode: 'layer' }
+```
+
+---
+
+## Add Nemotron SDK support
+
+PR: [#4357](https://github.com/tetherto/qvac/pull/4357)
+
+Parakeet `modelConfig.language` must match `/^(|auto|[a-zA-Z]{2,3}(-[a-zA-Z]{2,4})?)$/`. Values that used to load now fail at `loadModel` — for example `zh-Hans-CN`, or a language name rather than a code. Whisper `language` is unchanged.
+
 **BEFORE:**
 
 ```typescript
 modelConfig: {
-  splitMode: row
+  language: 'zh-Hans-CN'
 }
 ```
 
@@ -162,7 +198,7 @@ modelConfig: {
 
 ```typescript
 modelConfig: {
-  splitMode: layer
+  language: 'zh'
 }
 ```
 
