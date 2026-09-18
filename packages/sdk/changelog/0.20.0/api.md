@@ -60,11 +60,20 @@ PR: [#4406](https://github.com/tetherto/qvac/pull/4406)
 
 ```typescript
 // Describe a clip, then re-synthesize it from the recovered codes.
-const run = audioUnderstand({ modelId, sourceAudio: "/path/to/song.wav" });
-const { caption, bpm, keyscale, audioCodes } = await run.description;
+const run = audioUnderstand({ modelId, sourceAudio: '/path/to/song.wav' })
+const { caption, bpm, keyscale, audioCodes } = await run.description
 
-const remake = audioGen({ modelId, caption, audioCodes, generateLrc: true });
-const { lrc, lyricsScore } = (await remake.stats) ?? {};
+const remake = audioGen({ modelId, caption, audioCodes, generateLrc: true })
+const { lrc, lyricsScore } = (await remake.stats) ?? {}
+
+const edited = audioEdit({
+  modelId,
+  sourceAudio: '/path/to/song.wav',
+  operations: [
+    { type: 'flow-edit', from: { caption: 'acoustic folk' }, to: { caption: 'synthwave' } },
+    { type: 'repaint', caption: 'analog synth solo', start: 10, end: 20 }
+  ]
+})
 ```
 
 ---
@@ -77,27 +86,27 @@ PR: [#4414](https://github.com/tetherto/qvac/pull/4414)
 // Load-time options that were unreachable before
 await loadModel({
   modelSrc: TTS_COSYVOICE3_LLM_COSYVOICE_Q8_0,
-  modelType: "tts",
+  modelType: 'tts',
   modelConfig: {
-    ttsEngine: "cosyvoice3",
-    referenceAudioSrc: "/path/to/reference.wav",
+    ttsEngine: 'cosyvoice3',
+    referenceAudioSrc: '/path/to/reference.wav',
     cosyvoice3S3tokModelSrc: TTS_COSYVOICE3_S3TOK_COSYVOICE_Q8_0.src,
     cosyvoice3CampplusModelSrc: TTS_COSYVOICE3_CAMPPLUS_COSYVOICE_FP32.src,
-    promptText: "Exactly what the reference recording says.", // omit for cross-lingual
-    lavasrEnhancerModelSrc: TTS_ENHANCER_LAVASR_FP16.src,
-  },
-});
+    promptText: 'Exactly what the reference recording says.', // omit for cross-lingual
+    lavasrEnhancerModelSrc: TTS_ENHANCER_LAVASR_FP16.src
+  }
+})
 // Likewise: Chatterbox { outputSampleRate, ttsSpeed, nCtx, kvCacheType },
 // Supertonic { pace, threads, nGpuLayers, seed }, Parler { lavasr*ModelSrc },
 // all engines { backendsDir } (+ openclCacheDir where the engine reads it).
 
 // New result surface
-const result = textToSpeech({ modelId, text });
-const sampleRate = await result.sampleRate;   // resolves on the first frame; 48000 with the enhancer
-for await (const sample of result.bufferStream) play(sample);
-const stats = await result.stats;             // realTimeFactor, backendId, generatedFrames, …
-await cancel({ requestId: result.requestId }); // stops the engine, not just delivery
-(await result.stopReason) === "cancelled";
+const result = textToSpeech({ modelId, text })
+const sampleRate = await result.sampleRate // resolves on the first frame; 48000 with the enhancer
+for await (const sample of result.bufferStream) play(sample)
+const stats = await result.stats // realTimeFactor, backendId, generatedFrames, …
+await cancel({ requestId: result.requestId }) // stops the engine, not just delivery
+;(await result.stopReason) === 'cancelled'
 
 // Response frames: sampleRate, chunkIndex, sentenceChunk, isLast; terminal frame: stats, stopReason
 // New root exports: TTS_ENGINES, TtsEngine, TTS_PARLER_EMOTIONS, TTS_SENTENCE_DELIMITER_PRESETS,
@@ -152,7 +161,10 @@ PR: [#4476](https://github.com/tetherto/qvac/pull/4476)
 
 ```ts
 const run = sdk.completion({
-  modelId, history, tools: [getWeather], stream: false,
+  modelId,
+  history,
+  tools: [getWeather],
+  stream: false,
   generationParams: { tool_choice: 'required' }
 })
 const final = await run.final
@@ -181,10 +193,7 @@ addons.find((addon) => addon.name === 'bare-posix')?.linkedHosts // []
 PR: [#4500](https://github.com/tetherto/qvac/pull/4500)
 
 ```ts
-import {
-  MOBILE_HOSTS_BY_PLATFORM,
-  mobileHostsForPlatform
-} from '@/expo/plugins/withMobileBundle'
+import { MOBILE_HOSTS_BY_PLATFORM, mobileHostsForPlatform } from '@/expo/plugins/withMobileBundle'
 
 mobileHostsForPlatform('android')
 // ['android-arm64']
@@ -200,4 +209,3 @@ mobileHostsForPlatform('web')
 ```
 
 ---
-

@@ -187,9 +187,9 @@ const modelId = await loadModel({
 })
 ```
 
-##### AudioGen understand and remake
+##### AudioGen understand, remake, and edit
 
-`audioUnderstand` returns caption, bpm, keyscale, and audio codes. Pass those codes back into `audioGen` to re-synthesize the clip, optionally with LRC lyrics.
+`audioUnderstand` returns caption, bpm, keyscale, and audio codes. Pass those codes back into `audioGen` to re-synthesize the clip, optionally with LRC lyrics. `audioEdit` runs an ordered `flow-edit` / `repaint` pipeline on a source recording and returns the same run shape as `audioGen`.
 
 ```typescript
 const run = audioUnderstand({ modelId, sourceAudio: '/path/to/song.wav' })
@@ -197,6 +197,15 @@ const { caption, bpm, keyscale, audioCodes } = await run.description
 
 const remake = audioGen({ modelId, caption, audioCodes, generateLrc: true })
 const { lrc, lyricsScore } = (await remake.stats) ?? {}
+
+const edited = audioEdit({
+  modelId,
+  sourceAudio: '/path/to/song.wav',
+  operations: [
+    { type: 'flow-edit', from: { caption: 'acoustic folk' }, to: { caption: 'synthwave' } },
+    { type: 'repaint', caption: 'analog synth solo', start: 10, end: 20 }
+  ]
+})
 ```
 
 ##### TTS load options, sample rate, and cancel
