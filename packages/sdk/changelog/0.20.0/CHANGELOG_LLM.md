@@ -2,7 +2,7 @@
 
 📦 **NPM:** https://www.npmjs.com/package/@qvac/sdk/v/0.20.0
 
-QVAC SDK 0.20.0 adds TranslatePsy-AfriSLM translation, an in-process TurboVec vector index, MiniMax-H3 video, Parakeet Nemotron transcription, and the rest of the AudioGen and TTS surfaces. ABot-World sessions (`worldCreateScene` / `worldStep`) are on this surface. `loadModel` runs an advisory llama.cpp fit check. Diffusion VAE constant names, CPU flags, `splitMode: 'row'`, and how system prompts combine with KV cache all change.
+QVAC SDK 0.20.0 adds TranslatePsy-AfriSLM translation, an in-process TurboVec vector index, MiniMax-H3 video, Parakeet Nemotron transcription, and the rest of the AudioGen and TTS surfaces. ABot-World sessions (`worldCreateScene` / `worldStep`) are on this surface. `loadModel` runs an advisory llama.cpp fit check. Diffusion VAE constant names, CPU flags, `'row'` split, Parakeet `language` codes, and how system prompts combine with KV cache all change.
 
 `@qvac/sdk`, `@qvac/inference`, and `tetherto-qvac-sdk` all ship at 0.20.0. Install `@qvac/sdk` and `@qvac/inference` together at this version.
 
@@ -99,15 +99,45 @@ completion({
 
 Callers that previously sent user-only history and relied on no system message must pass `system_prompt: ''` at load (or an explicit empty system turn) if they need that behaviour.
 
-### `splitMode: 'row'` is rejected
+### `'row'` split is rejected
 
-Fabric 10549.1.0 dropped llama.cpp's unused row split. `modelConfig.splitMode` is `'none'` or `'layer'`. `'row'` is rejected.
+Fabric 10549.1.0 dropped llama.cpp's unused row split.
+
+Completion models: `modelConfig['split-mode']` is `'none'`, `'layer'` or `'tensor'`. `'row'` is rejected.
+Embedding models: `modelConfig.splitMode` is `'none'` or `'layer'`. `'row'` is rejected.
+`'tensor'` on completion models is unaffected.
+
+On embeddings, `'row'` was documented as tensor parallelism. That llama.cpp row split never took effect here (SYCL-only; it ran as `'layer'`), and embeddings have no `'tensor'` replacement. Use `'layer'`.
+
+**Before:**
+
+```typescript
+// completion
+modelConfig: { 'split-mode': 'row' }
+
+// embedding
+modelConfig: { splitMode: 'row' }
+```
+
+**After:**
+
+```typescript
+// completion
+modelConfig: { 'split-mode': 'layer' } // or 'tensor'
+
+// embedding
+modelConfig: { splitMode: 'layer' }
+```
+
+### Parakeet `language` is a locale code
+
+Parakeet `modelConfig.language` must match `/^(|auto|[a-zA-Z]{2,3}(-[a-zA-Z]{2,4})?)$/`. Values that used to load now fail at `loadModel` — for example `zh-Hans-CN`, or a language name rather than a code. Whisper `language` is unchanged.
 
 **Before:**
 
 ```typescript
 modelConfig: {
-  splitMode: 'row'
+  language: 'zh-Hans-CN'
 }
 ```
 
@@ -115,7 +145,7 @@ modelConfig: {
 
 ```typescript
 modelConfig: {
-  splitMode: 'layer'
+  language: 'zh'
 }
 ```
 
