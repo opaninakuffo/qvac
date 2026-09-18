@@ -41,10 +41,6 @@ Release Date: 2026-09-17
 - Regenerate SDK and AI SDK provider model catalogs. (see PR [#4384](https://github.com/tetherto/qvac/pull/4384)) - See [model changes](./models.md)
   Added: TRANSLATEPSY_AFRISLM_0_8B_TRANSLATION_Q4_K_M, TRANSLATEPSY_AFRISLM_0_8B_TRANSLATION_Q8_0, TRANSLATEPSY_AFRISLM_2B_TRANSLATION_Q4_K_M, TRANSLATEPSY_AFRISLM_2B_TRANSLATION_Q8_0, TRANSLATEPSY_AFRISLM_4B_TRANSLATION_Q4_K_M (and 4 more)
 
-## 📘 Docs
-
-- Hide world simulation from v0.19 user-facing surfaces. (see PR [#4375](https://github.com/tetherto/qvac/pull/4375))
-
 ## 🧹 Chores
 
 - Unify agent configuration. (see PR [#4353](https://github.com/tetherto/qvac/pull/4353))
