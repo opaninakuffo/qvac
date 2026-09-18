@@ -65,6 +65,15 @@ const { caption, bpm, keyscale, audioCodes } = await run.description
 
 const remake = audioGen({ modelId, caption, audioCodes, generateLrc: true })
 const { lrc, lyricsScore } = (await remake.stats) ?? {}
+
+const edited = audioEdit({
+  modelId,
+  sourceAudio: '/path/to/song.wav',
+  operations: [
+    { type: 'flow-edit', from: { caption: 'acoustic folk' }, to: { caption: 'synthwave' } },
+    { type: 'repaint', caption: 'analog synth solo', start: 10, end: 20 }
+  ]
+})
 ```
 
 ---
