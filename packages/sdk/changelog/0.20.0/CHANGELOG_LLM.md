@@ -2,7 +2,7 @@
 
 📦 **NPM:** https://www.npmjs.com/package/@qvac/sdk/v/0.20.0
 
-QVAC SDK 0.20.0 adds an in-process TurboVec vector index, MiniMax-H3 video, Parakeet Nemotron transcription, and the rest of the AudioGen and TTS surfaces. On mobile, llama `assessModelFit` runs in-process on a worker thread instead of a child process. Diffusion CPU flags, `splitMode: 'row'`, and how system prompts combine with KV cache all change.
+QVAC SDK 0.20.0 adds TranslatePsy-AfriSLM translation, an in-process TurboVec vector index, MiniMax-H3 video, Parakeet Nemotron transcription, and the rest of the AudioGen and TTS surfaces. `loadModel` runs an advisory llama.cpp fit check. Diffusion VAE constant names, CPU flags, `splitMode: 'row'`, and how system prompts combine with KV cache all change.
 
 `@qvac/sdk`, `@qvac/inference`, and `tetherto-qvac-sdk` all ship at 0.20.0. Install `@qvac/sdk` and `@qvac/inference` together at this version.
 
@@ -39,6 +39,28 @@ const modelConfig = {
   max_vram: -1,
   stream_layers: true
 }
+```
+
+### Diffusion VAE constant names
+
+Generated VAE exports now include the registry type tag, so LTX audio/video and ABot TAeHV/Wan no longer collapse to `_1` suffixes.
+
+**Before:**
+
+```typescript
+ABOT_WORLD_0_5B_LF_VAE
+ABOT_WORLD_0_5B_LF_VAE_F16
+LTX_2_3_VAE
+LTX_2_3_VAE_1
+```
+
+**After:**
+
+```typescript
+ABOT_WORLD_0_5B_LF_TAEHV_VAE
+ABOT_WORLD_0_5B_LF_WAN_VAE
+LTX_2_3_AUDIO_VAE
+LTX_2_3_VIDEO_VAE
 ```
 
 ### System prompts apply on every completion path
@@ -84,13 +106,17 @@ Fabric 10549.1.0 dropped llama.cpp's unused row split. `modelConfig.splitMode` i
 **Before:**
 
 ```typescript
-modelConfig: { splitMode: 'row' }
+modelConfig: {
+  splitMode: 'row'
+}
 ```
 
 **After:**
 
 ```typescript
-modelConfig: { splitMode: 'layer' }
+modelConfig: {
+  splitMode: 'layer'
+}
 ```
 
 ## New APIs
@@ -200,6 +226,10 @@ if (final.toolCalls.length === 0) console.log(final.toolErrors)
 
 ## Features
 
+`translate()` detects TranslatePsy-AfriSLM by registry name or GGUF filename and applies that family's prompts and deterministic decoding. Custom context is ignored for these models.
+
+Before each llama.cpp completion or embedding load, `loadModel` runs `@qvac/model-fit` in a disposable child and logs `fit` / `does-not-fit` / no evidence. The check is fail-open: a missing verdict, crash, timeout, or refusal never blocks the load. Set `QVAC_ADVISORY_MODEL_FIT=0` to skip it. This is separate from `assessModelFit` and from the in-process mobile fit below.
+
 On Android and iOS, llama `assessModelFit` runs `@qvac/model-fit` in-process on a worker thread. There is no disposable child process on those hosts. A leftover `.running` marker from a previous abort is treated as crashed so the same path and config skip native instead of retrying the abort. The JavaScript loop stays free while the fit runs.
 
 `@qvac/tts-ggml` 0.9.x installs host binaries in per-platform packages (`@qvac/tts-ggml-darwin-arm64` and siblings) next to the meta package. `qvac verify bundle` looks there instead of under the meta package's `prebuilds/`.
@@ -217,7 +247,29 @@ Mobile `withQvacSDK` prebuild verifies only the hosts the bundle actually links,
 ### Added
 
 ```
+ABOT_WORLD_0_5B_LF_TAEHV_VAE
+ABOT_WORLD_0_5B_LF_WAN_VAE
+LTX_2_3_AUDIO_VAE
+LTX_2_3_VIDEO_VAE
+PARAKEET_0_6B_F16
+PARAKEET_0_6B_Q4_0
+PARAKEET_0_6B_Q8_0
 PARAKEET_NEMOTRON_0_6B_F16
 PARAKEET_NEMOTRON_0_6B_Q4_0
 PARAKEET_NEMOTRON_0_6B_Q8_0
+TRANSLATEPSY_AFRISLM_0_8B_TRANSLATION_Q4_K_M
+TRANSLATEPSY_AFRISLM_0_8B_TRANSLATION_Q8_0
+TRANSLATEPSY_AFRISLM_2B_TRANSLATION_Q4_K_M
+TRANSLATEPSY_AFRISLM_2B_TRANSLATION_Q8_0
+TRANSLATEPSY_AFRISLM_4B_TRANSLATION_Q4_K_M
+TRANSLATEPSY_AFRISLM_4B_TRANSLATION_Q8_0
+```
+
+### Removed
+
+```
+ABOT_WORLD_0_5B_LF_VAE
+ABOT_WORLD_0_5B_LF_VAE_F16
+LTX_2_3_VAE
+LTX_2_3_VAE_1
 ```

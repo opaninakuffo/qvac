@@ -5,20 +5,22 @@
 PR: [#4389](https://github.com/tetherto/qvac/pull/4389)
 
 **BEFORE:**
+
 ```typescript
 const modelConfig = {
   clip_on_cpu: true,
   vae_on_cpu: true,
-  control_net_cpu: true,
-};
+  control_net_cpu: true
+}
 ```
 
 **AFTER:**
+
 ```typescript
 const modelConfig = {
   params_backend: 'te=cpu,vae=cpu',
-  backend: 'controlnet=cpu',
-};
+  backend: 'controlnet=cpu'
+}
 ```
 
 To run the text encoder or VAE graph on CPU, add `te=cpu` or `vae=cpu` to `backend`.
@@ -29,8 +31,32 @@ CPU layer streaming requires CPU diffusion parameter residency and graph cutting
 const modelConfig = {
   params_backend: 'diffusion=cpu',
   max_vram: -1,
-  stream_layers: true,
-};
+  stream_layers: true
+}
+```
+
+---
+
+## Derive diffusion VAE export names from the type tag
+
+PR: [#4234](https://github.com/tetherto/qvac/pull/4234)
+
+**BEFORE:**
+
+```typescript
+ABOT_WORLD_0_5B_LF_VAE
+ABOT_WORLD_0_5B_LF_VAE_F16
+LTX_2_3_VAE
+LTX_2_3_VAE_1
+```
+
+**AFTER:**
+
+```typescript
+ABOT_WORLD_0_5B_LF_TAEHV_VAE
+ABOT_WORLD_0_5B_LF_WAN_VAE
+LTX_2_3_AUDIO_VAE
+LTX_2_3_VIDEO_VAE
 ```
 
 ---
@@ -40,6 +66,7 @@ const modelConfig = {
 PR: [#4404](https://github.com/tetherto/qvac/pull/4404)
 
 **BEFORE:**
+
 ```typescript
 completion({
   modelId, // loaded with system_prompt: 'You are a helpful assistant.'
@@ -54,6 +81,7 @@ completion({
 ```
 
 **AFTER:**
+
 ```typescript
 completion({
   modelId, // loaded with system_prompt: 'You are a helpful assistant.'
@@ -118,14 +146,19 @@ completion({
 PR: [#4439](https://github.com/tetherto/qvac/pull/4439)
 
 **BEFORE:**
+
 ```typescript
-modelConfig: { splitMode: row }
+modelConfig: {
+  splitMode: row
+}
 ```
 
 **AFTER:**
+
 ```typescript
-modelConfig: { splitMode: layer }
+modelConfig: {
+  splitMode: layer
+}
 ```
 
 ---
-
