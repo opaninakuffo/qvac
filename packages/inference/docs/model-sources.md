@@ -13,11 +13,6 @@ under `src/models/registry/`. The SDK re-exports the inference model registry.
 - Use the live registry input and generator as the authority for names and metadata;
   do not maintain a hand-written model inventory in documentation.
 
-An embedding descriptor may explicitly select `modelType: 'llamacpp-decision'`
-when loading a Laya checkpoint. The native decision loader validates checkpoint
-compatibility. This override does not change automatic engine inference or allow
-other engine mismatches, including loading a decision descriptor as embeddings.
-
 On macOS and iOS, a registry GGUF can pair with a compiled Apple Core ML bundle
 that the native addon runs a stage on when it sits next to the GGUF; the pairs
 are listed in `src/handlers/load-model/coreml-sidecars.ts`. The registry

@@ -89,6 +89,15 @@ def test_infer_from_model_constant_and_descriptor_dict():
 # ---- load_model wrapper --------------------------------------------------
 
 
+async def test_load_model_infers_type_from_descriptor():
+    transport = FakeTransport(response=OK)
+    model_id = await api.load_model(transport, model_src=QWEN3_600M_INST_Q4)
+    assert model_id == "m-1"
+    assert transport.sent["modelType"] == "llamacpp-completion"
+    # The wire modelSrc is the descriptor's src string, not the dataclass.
+    assert transport.sent["modelSrc"] == QWEN3_600M_INST_Q4.src
+
+
 async def test_laya_constant_infers_decision_engine_with_shared_addon():
     transport = FakeTransport(response=OK)
     await api.load_model(
