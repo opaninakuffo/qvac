@@ -7,7 +7,7 @@
    ```json
    {
      "source": "https://huggingface.co/<org>/<repo>/resolve/<commit>/<file>",
-     "engine": "llamacpp-completion",
+     "engine": "<canonical-engine-id>",
      "licenseId": "MIT",
      "quantization": "q4_0",
      "params": "1B",
