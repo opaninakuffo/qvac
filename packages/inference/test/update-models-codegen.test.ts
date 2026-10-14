@@ -52,9 +52,15 @@ test('codegen emits registry strings as data', (t) => {
   t.is(entry.engine, 'llamacpp-completion')
 })
 
-test('canonical registry engines survive processing and generation for a shared addon', (t) => {
-  const engines = ['llamacpp-decision', 'llamacpp-embedding'] as const
-  const processed = engines.map((engine) => {
+test('registry processing and generation preserve canonical engines across capabilities', (t) => {
+  const cases = [
+    ['llamacpp-completion', 'llm'],
+    ['llamacpp-decision', 'embeddings'],
+    ['llamacpp-embedding', 'embeddings'],
+    ['whispercpp-transcription', 'whisper'],
+    ['nmtcpp-translation', 'nmt']
+  ] as const
+  const processed = cases.map(([engine]) => {
     const entry = processRegistryModel({
       path: `example/${engine}/model-Q8_0.gguf`,
       source: 'hf',
@@ -82,10 +88,10 @@ test('canonical registry engines survive processing and generation for a shared 
   const generated = catalogModels(generateModelsFileContent(processed))
   t.alike(
     generated.map((entry) => entry.engine),
-    [...engines]
+    cases.map(([engine]) => engine)
   )
   t.alike(
     generated.map((entry) => entry.addon),
-    ['embeddings', 'embeddings']
+    cases.map(([, addon]) => addon)
   )
 })

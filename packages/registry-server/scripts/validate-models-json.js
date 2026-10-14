@@ -80,7 +80,7 @@ const ciFields = {
 
   engine: baseModelFields.engine.regex(
     ENGINE_PATTERN,
-    'Invalid engine format (expected engine-usecase, e.g. llamacpp-decision, or a legacy @qvac/<package>)'
+    'Invalid engine format (expected engine-usecase, e.g. llamacpp-completion, or a legacy @qvac/<package>)'
   ),
 
   replacedBy: z

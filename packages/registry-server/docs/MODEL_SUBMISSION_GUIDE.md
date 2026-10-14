@@ -26,8 +26,8 @@
 
 Use the canonical `engine-usecase` identifier of the plugin that loads the model,
 such as `llamacpp-completion`, `llamacpp-embedding`, or `llamacpp-decision`.
-An addon package can implement several plugins: Laya decision checkpoints use
-`llamacpp-decision` even though their plugin currently uses `@qvac/embed-llamacpp`.
+An addon package can implement several plugins. Classify each model by the plugin
+that loads it, rather than inferring its capability from the shared package.
 Legacy `@qvac/<package>` engine values remain accepted for existing submissions;
 do not infer a new model's capability from its addon package.
 

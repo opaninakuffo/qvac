@@ -5,15 +5,19 @@ const { createModelSchema } = require('../../scripts/validate-models-json')
 
 const schema = createModelSchema(new Set(['MIT']))
 const model = {
-  source: 'https://huggingface.co/example/laya/resolve/' + 'a'.repeat(40) + '/model.gguf',
+  source: 'https://huggingface.co/example/models/resolve/' + 'a'.repeat(40) + '/model.gguf',
   licenseId: 'MIT'
 }
 
 test('registry submissions accept canonical engines and existing package ids', (t) => {
   for (const engine of [
+    'llamacpp-completion',
     'llamacpp-decision',
     'llamacpp-embedding',
     'whispercpp-transcription',
+    'nmtcpp-translation',
+    'tts-ggml',
+    'ggml-ocr',
     '@qvac/embed-llamacpp'
   ]) {
     t.ok(schema.safeParse({ ...model, engine }).success, engine)

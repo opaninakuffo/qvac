@@ -40,8 +40,7 @@ export function roleForAddon(addon: string): string {
 }
 
 function roleForModel(model: ModelConstant): string {
-  const role = normalizeEndpointCategory(model.engine)
-  return role === model.engine ? roleForAddon(model.addon) : role
+  return model.engine ? normalizeEndpointCategory(model.engine) : roleForAddon(model.addon)
 }
 
 function metaFrom(modelSrc: string | ModelConstant, sdkType: string) {

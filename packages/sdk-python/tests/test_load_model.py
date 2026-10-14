@@ -89,6 +89,21 @@ def test_infer_from_model_constant_and_descriptor_dict():
 # ---- load_model wrapper --------------------------------------------------
 
 
+@pytest.mark.parametrize(
+    "engine",
+    [
+        "llamacpp-completion",
+        "llamacpp-embedding",
+        "llamacpp-decision",
+        "whispercpp-transcription",
+        "nmtcpp-translation",
+    ],
+)
+def test_canonical_engine_takes_precedence_over_addon_category(engine):
+    descriptor = {"src": "model.gguf", "engine": engine, "addon": "embeddings"}
+    assert infer_model_type_from_model_src(descriptor) == engine
+
+
 async def test_load_model_infers_type_from_descriptor():
     transport = FakeTransport(response=OK)
     model_id = await api.load_model(transport, model_src=QWEN3_600M_INST_Q4)
