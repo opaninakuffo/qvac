@@ -7,9 +7,7 @@ const { z } = require('zod')
 const { parseCanonicalSource } = require('../lib/source-helpers')
 const { baseModelFields } = require('../lib/model-schema')
 
-// Canonical engine-usecase ids identify the plugin; package ids remain readable
-// for existing registry submissions during migration.
-const ENGINE_PATTERN = /^(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)+|@qvac\/[a-z][a-z0-9-]*)$/
+const ENGINE_PATTERN = /^@qvac\/[a-z][a-z0-9-]*$/
 const S3_DATE_FOLDER_PATTERN = /\/\d{4}-\d{2}-\d{2}\//
 const HF_COMMIT_HASH_PATTERN = /huggingface\.co\/.+\/(resolve|blob)\/([a-f0-9]{40})\//
 
@@ -80,7 +78,7 @@ const ciFields = {
 
   engine: baseModelFields.engine.regex(
     ENGINE_PATTERN,
-    'Invalid engine format (expected engine-usecase, e.g. llamacpp-completion, or a legacy @qvac/<package>)'
+    'Invalid engine format (expected @qvac/<engine-name>)'
   ),
 
   replacedBy: z

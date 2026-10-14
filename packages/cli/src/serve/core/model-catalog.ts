@@ -39,10 +39,6 @@ export function roleForAddon(addon: string): string {
   return normalizeEndpointCategory(addon)
 }
 
-function roleForModel(model: ModelConstant): string {
-  return model.engine ? normalizeEndpointCategory(model.engine) : roleForAddon(model.addon)
-}
-
 function metaFrom(modelSrc: string | ModelConstant, sdkType: string) {
   if (typeof modelSrc === 'string') {
     return { addon: null, engine: sdkType || null, quantization: null, params: null, size: null }
@@ -104,7 +100,7 @@ export function buildBuiltinCatalog(constants: Map<string, ModelConstant>): Mode
       configured: false,
       usable: false,
       state: 'not_configured',
-      role: roleForModel(model),
+      role: roleForAddon(model.addon),
       addon: model.addon ?? null,
       engine: model.engine ?? null,
       quantization: model.quantization || null,

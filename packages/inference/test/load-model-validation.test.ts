@@ -12,36 +12,6 @@ test('Laya constants infer the decision engine and accept the matching explicit 
   )
 })
 
-test('canonical engine controls inference and validation independently of addon category', (t) => {
-  for (const engine of [
-    ModelType.llamacppCompletion,
-    ModelType.llamacppEmbedding,
-    ModelType.llamacppDecision,
-    ModelType.whispercppTranscription,
-    ModelType.nmtcppTranslation
-  ]) {
-    const descriptor = { src: 'registry://example/model.gguf', engine, addon: 'embeddings' }
-    t.is(inferModelTypeFromModelSrc(descriptor), engine)
-    t.execution(() => assertModelSrcMatchesModelType(descriptor, engine))
-  }
-})
-
-test('distinct canonical engines reject mismatches regardless of addon sharing', (t) => {
-  for (const [engine, explicit] of [
-    [ModelType.llamacppCompletion, ModelType.llamacppEmbedding],
-    [ModelType.whispercppTranscription, ModelType.parakeetTranscription],
-    [ModelType.parakeetTranscription, ModelType.whispercppTranscription],
-    [ModelType.nmtcppTranslation, ModelType.llamacppCompletion]
-  ] as const) {
-    try {
-      assertModelSrcMatchesModelType({ src: 'registry://example/model.gguf', engine }, explicit)
-      t.fail('Expected ModelSrcTypeMismatchError')
-    } catch (error) {
-      t.ok(error instanceof ModelSrcTypeMismatchError)
-    }
-  }
-})
-
 test('embedding descriptors reject decision loads despite sharing the addon', (t) => {
   for (const descriptor of [
     { src: 'registry://example/embedding.gguf', engine: ModelType.llamacppEmbedding },
