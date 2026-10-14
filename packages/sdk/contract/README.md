@@ -20,6 +20,13 @@ registry` (`ModelType`, `Verbosity`, `PluginId`,
   directly and pass as `modelSrc`. Not part of the RPC wire contract, but a
   static data catalog downstream client generators need the same way.
 
+- `model-type-maps.json` — canonical engine/category mappings, recognized legacy
+  engine identifiers, and `legacyRegistryEngineRules` for shared legacy packages
+  that need discriminator tags. Registry submission validation consumes this
+  generated contract; it does not maintain a separate engine allowlist. These
+  rules describe legacy classification, not checkpoint compatibility with
+  multiple plugins.
+
 Do not edit these files by hand. Regenerate with:
 
 ```bash

@@ -7,7 +7,7 @@
    ```json
    {
      "source": "https://huggingface.co/<org>/<repo>/resolve/<commit>/<file>",
-     "engine": "@qvac/<engine-name>",
+     "engine": "<canonical-engine-id>",
      "licenseId": "MIT",
      "quantization": "q4_0",
      "params": "1B",
@@ -21,6 +21,26 @@
 2. If the model uses a license not already in `data/licenses.json`, add a new entry there and place the full license text at `data/licenses/<license-id>/LICENSE.txt`.
 3. Run validation: `npm run validate:models`
 4. Submit PR targeting `main`
+
+### Engine classification
+
+Use the canonical `engine-usecase` identifier of the plugin that loads the model,
+such as `llamacpp-completion`, `llamacpp-embedding`, or `moss-transcribe`.
+Supported identifiers come from the generated SDK engine contract
+(`packages/sdk/contract/model-type-maps.json`). Unknown identifiers are rejected,
+even if they have the right spelling format. Regenerate the contract when adding
+an engine.
+
+An addon package can implement several plugins. Classify each model by the plugin
+that loads it, rather than inferring its capability from the shared package.
+Legacy `@qvac/<package>` engine values remain accepted for existing submissions;
+do not infer a new model's capability from its addon package. Shared legacy
+package IDs require their existing discriminator tags, such as `moss-transcribe`
+for `@qvac/asr-ggml`. Generation and live queries use the same classification
+rules, so both paths return the same engine.
+
+Coordinate registry metadata sync with client releases that recognize the canonical
+engine. Older clients may skip entries with an engine they do not recognize.
 
 ### Source URL Formats
 
