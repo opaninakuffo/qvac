@@ -13,10 +13,17 @@ under `src/models/registry/`. The SDK re-exports the inference model registry.
 - Use the live registry input and generator as the authority for names and metadata;
   do not maintain a hand-written model inventory in documentation.
 
-An embedding descriptor may explicitly select `modelType: 'llamacpp-decision'`
-when loading a Laya checkpoint. The native decision loader validates checkpoint
-compatibility. This override does not change automatic engine inference or allow
-other engine mismatches, including loading a decision descriptor as embeddings.
+A model descriptor's `engine` identifies its canonical plugin, independently of
+which addon package implements it. Laya constants use `llamacpp-decision`, while
+embedding constants use `llamacpp-embedding`; both plugins currently use
+`@qvac/embed-llamacpp`. Explicit `modelType` selection must match the descriptor's
+engine. Legacy package-valued engines remain supported for existing embedding
+entries, but cannot distinguish decision models from embeddings.
+
+Registry submissions and the generated catalog must agree on the canonical engine.
+Sync corrected registry metadata before clients rely on registry-returned Laya
+descriptors. Regenerate the catalog and downstream clients from the corrected
+metadata; do not patch generated constants or bypass model-type validation.
 
 On macOS and iOS, a registry GGUF can pair with a compiled Apple Core ML bundle
 that the native addon runs a stage on when it sits next to the GGUF; the pairs

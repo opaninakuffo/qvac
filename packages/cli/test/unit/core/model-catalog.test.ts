@@ -44,7 +44,7 @@ function resolved(over: Partial<ResolvedModelEntry> & { alias: string }): Resolv
 }
 
 describe('model-catalog', () => {
-  it('lists Laya models under their registry addon role', () => {
+  it('uses canonical engines to distinguish decision and embedding models sharing an addon', () => {
     const embedding = constant('EMBEDDING', { addon: 'embeddings', engine: 'llamacpp-embedding' })
     const catalog = buildCatalog(
       serveConfig(new Map()),
@@ -54,12 +54,24 @@ describe('model-catalog', () => {
         [embedding.name, embedding]
       ])
     )
-    assert.deepEqual(filterCatalog(catalog, { role: 'decision' }), [])
+    assert.deepEqual(
+      filterCatalog(catalog, { role: 'decision' }).map((entry) => entry.id),
+      [LAYA_MULTILINGUAL_322M_Q8_0.name]
+    )
     assert.ok(catalog.every((entry) => entry.addon === 'embeddings'))
     assert.deepEqual(
       filterCatalog(catalog, { role: 'embedding' }).map((entry) => entry.id),
-      ['EMBEDDING', LAYA_MULTILINGUAL_322M_Q8_0.name]
+      ['EMBEDDING']
     )
+  })
+
+  it('preserves addon roles for engines without an endpoint category', () => {
+    const catalog = buildCatalog(
+      serveConfig(new Map()),
+      createModelRegistry(),
+      new Map([['VLA', constant('VLA', { addon: 'vla', engine: 'ggml-vla' })]])
+    )
+    assert.equal(catalog[0]!.role, 'vla')
   })
 
   it('marks a built-in constant not_configured / not usable, with size + role', () => {

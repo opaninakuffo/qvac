@@ -1,6 +1,7 @@
 import test from 'brittle'
 import { generateModelsFileContent } from '@/models/update-models/codegen'
 import type { ProcessedModel } from '@/models/update-models/types'
+import { processRegistryModel } from '@/models/update-models/processing'
 
 function model(overrides: Partial<ProcessedModel> = {}): ProcessedModel {
   return {
@@ -49,4 +50,42 @@ test('codegen emits registry strings as data', (t) => {
   t.is(entry.registryPath, registryPath)
   t.is(entry.modelId, modelId)
   t.is(entry.engine, 'llamacpp-completion')
+})
+
+test('canonical registry engines survive processing and generation for a shared addon', (t) => {
+  const engines = ['llamacpp-decision', 'llamacpp-embedding'] as const
+  const processed = engines.map((engine) => {
+    const entry = processRegistryModel({
+      path: `example/${engine}/model-Q8_0.gguf`,
+      source: 'hf',
+      engine,
+      license: 'MIT',
+      name: engine,
+      sizeBytes: 1,
+      sha256: 'ab',
+      quantization: 'Q8_0',
+      params: '1B',
+      tags: [],
+      blobBinding: {
+        coreKey: Buffer.from('ab', 'hex'),
+        blockOffset: 0,
+        blockLength: 1,
+        byteOffset: 0,
+        byteLength: 1,
+        sha256: 'ab'
+      }
+    } as Parameters<typeof processRegistryModel>[0])
+    if (!entry) throw new Error(`Failed to process ${engine}`)
+    return entry
+  })
+
+  const generated = catalogModels(generateModelsFileContent(processed))
+  t.alike(
+    generated.map((entry) => entry.engine),
+    [...engines]
+  )
+  t.alike(
+    generated.map((entry) => entry.addon),
+    ['embeddings', 'embeddings']
+  )
 })

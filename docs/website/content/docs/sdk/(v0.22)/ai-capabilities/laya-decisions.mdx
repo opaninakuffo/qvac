@@ -26,6 +26,8 @@ For how to use each function, see [SDK — API reference](/sdk/reference/api/).
 
 Use a Laya decision checkpoint in GGUF format. Supported checkpoint families include Laya, Laya multilingual, and Laya typed decisions. An embedding-only GGUF cannot answer decision questions.
 
+Named Laya constants carry the `llamacpp-decision` engine, so `loadModel({ modelSrc: LAYA_MULTILINGUAL_322M_Q8_0 })` selects the decision plugin automatically. The embedding and decision plugins share an addon package, but their model descriptors are not interchangeable.
+
 Pass a local file path or another supported model source to `loadModel()`. For checkpoints split into multiple GGUF files, see [Sharded models](/sdk/models/sharded-models).
 
 ## Questions and token budgets

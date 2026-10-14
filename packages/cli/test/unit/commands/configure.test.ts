@@ -47,7 +47,7 @@ describe('configure: presets / buildEntry', () => {
   })
 
   it('uses the recommended decision constant without requiring a source', () => {
-    assert.equal(modalityInfo('decision').role, 'embedding')
+    assert.equal(modalityInfo('decision').role, 'decision')
     const built = buildEntry('decision')
     assert.equal(built.aliasBase, LAYA_MULTILINGUAL_322M_Q8_0.name)
     assert.equal(built.addon, 'llamacpp-decision')

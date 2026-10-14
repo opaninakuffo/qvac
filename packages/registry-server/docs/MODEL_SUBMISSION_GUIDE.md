@@ -7,7 +7,7 @@
    ```json
    {
      "source": "https://huggingface.co/<org>/<repo>/resolve/<commit>/<file>",
-     "engine": "@qvac/<engine-name>",
+     "engine": "llamacpp-completion",
      "licenseId": "MIT",
      "quantization": "q4_0",
      "params": "1B",
@@ -21,6 +21,18 @@
 2. If the model uses a license not already in `data/licenses.json`, add a new entry there and place the full license text at `data/licenses/<license-id>/LICENSE.txt`.
 3. Run validation: `npm run validate:models`
 4. Submit PR targeting `main`
+
+### Engine classification
+
+Use the canonical `engine-usecase` identifier of the plugin that loads the model,
+such as `llamacpp-completion`, `llamacpp-embedding`, or `llamacpp-decision`.
+An addon package can implement several plugins: Laya decision checkpoints use
+`llamacpp-decision` even though their plugin currently uses `@qvac/embed-llamacpp`.
+Legacy `@qvac/<package>` engine values remain accepted for existing submissions;
+do not infer a new model's capability from its addon package.
+
+Coordinate registry metadata sync with client releases that recognize the canonical
+engine. Older clients may skip entries with an engine they do not recognize.
 
 ### Source URL Formats
 
